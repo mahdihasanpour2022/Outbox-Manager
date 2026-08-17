@@ -20,10 +20,9 @@ src/
     MessageItem.tsx
     StatusBadge.tsx
   hooks/
-    useOutbox.ts               # UI-facing domain API
     useStableListFocus.ts      # Keyboard/focus behavior
   outbox/
-    outboxReducer.ts           # Pure transitions
+    outboxStore.ts             # Typed Zustand state and actions
     selectors.ts               # Ordering and eligibility
     scheduler.ts               # Per-recipient execution policy
     types.ts                   # Internal action/attempt types
@@ -40,7 +39,7 @@ The exact number of files should stay proportional to the assignment. Small modu
 
 ### `App`
 
-Composes page regions and obtains the outbox view model. It should not manage abort controllers or determine which message sends next.
+Composes page regions and selects the outbox view model from the Zustand store. It should not manage abort controllers or determine which message sends next.
 
 ### `ComposeForm`
 
@@ -54,25 +53,33 @@ Renders list-level controls, selection summary, empty state, and live announceme
 
 Renders message metadata, plain-text content, selection, status, and contextual cancel/retry actions. It uses stable IDs for labels and keys.
 
-### `useOutbox`
+### Zustand store
 
-Exposes application actions such as compose, toggle selection, send selected, cancel, and retry. It connects reducer state to the scheduler lifecycle.
+`useOutboxStore` is created with Zustand's typed curried API:
 
-### Reducer
+```ts
+export const useOutboxStore = create<OutboxState & OutboxActions>()(
+  (set, get) => ({
+    // initial state and actions
+  }),
+);
+```
 
-Owns pure state transitions. Suggested actions include:
+It owns serializable product state and exposes actions such as:
 
-- `messageComposed`
-- `selectionToggled`
-- `selectionCleared`
-- `sendRequested`
-- `sendStarted`
-- `sendSucceeded`
-- `sendFailed`
-- `sendCancelled`
-- `retryRequested`
+- `composeMessage`
+- `toggleSelection`
+- `clearSelection`
+- `requestSelectedSend`
+- `markSendStarted`
+- `markSendSucceeded`
+- `markSendFailed`
+- `markSendCancelled`
+- `requestRetry`
 
-Invalid transitions should be ignored safely or surfaced during development.
+Actions that depend on previous state use functional `set((state) => nextState)` updates. Invalid transitions should be ignored safely or surfaced during development. Actions remain synchronous domain transitions; they do not own promises or abort controllers.
+
+Components subscribe to the smallest practical slice with atomic selectors such as `useOutboxStore((state) => state.messages)`. If one selector constructs a multi-value object or array, wrap it with `useShallow` from `zustand/react/shallow` to avoid rerenders when its selected values are shallowly unchanged. Do not subscribe components to the entire store by default.
 
 ### Selectors
 
@@ -84,18 +91,20 @@ Owns active attempts and calls `sendMessage`. It evaluates recipient lanes, disp
 
 ## State boundaries
 
-Reducer state should contain serializable product state: messages, selection, and requested-send intent. Controllers, promises, and attempt tokens belong to the scheduler/ref layer.
+Zustand state should contain serializable product state: messages, selection, requested-send intent, and synchronous actions. Controllers, promises, and attempt tokens belong to the scheduler layer.
 
 Avoid mirroring derived concepts such as “has selected messages” or recipient group arrays in state. Compute them from the canonical collections.
 
 ## Dependency direction
 
 ```text
-components -> useOutbox -> reducer/selectors
-                        -> scheduler -> messageApi
+components -> Zustand selectors/actions
+                  ^             |
+                  |             v
+             scheduler ----> messageApi
 ```
 
-The API and scheduler must not import UI components. Pure reducer/selectors must not import React or the network API.
+The scheduler may access the store imperatively but must not import UI components. Selectors must remain pure and must not import React or the network API. The store actions must not call the mock API directly.
 
 ## Error handling
 

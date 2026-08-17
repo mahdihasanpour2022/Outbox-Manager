@@ -8,8 +8,9 @@ The highest-risk behavior is asynchronous scheduling, followed by cancellation r
 
 The scheduler should accept the send function as a dependency or otherwise expose a narrow seam so tests can control promise resolution, rejection, and abortion. Tests should not depend on random delays or the mock API's random failure rate.
 
-## Reducer tests
+## Zustand store tests
 
+- Exercise actions through `useOutboxStore.getState()` and reset store state between tests.
 - New messages begin pending.
 - Send start changes only an eligible pending message to sending.
 - Success changes the current sending attempt to delivered.
@@ -18,6 +19,8 @@ The scheduler should accept the send function as a dependency or otherwise expos
 - Retry changes failed to pending and restores send eligibility.
 - Stale or duplicate lifecycle actions do not overwrite newer state.
 - Selection is removed or retained according to the documented action policy.
+- Actions that depend on previous state do not lose updates when invoked in quick succession.
+- Derived selectors return the expected ordering and eligibility without mutating store state.
 
 ## Scheduler tests
 

@@ -18,13 +18,13 @@ Use a scheduler that allows one active request per normalized recipient and conc
 
 This directly represents the product guarantee and keeps future scheduling-policy changes localized.
 
-## D3: Reducer plus imperative attempt registry
+## D3: Zustand store plus imperative scheduler
 
-**Status:** Proposed
+**Status:** Accepted
 
-Keep serializable message/selection intent in a reducer. Keep controllers, promises, and unique attempt identities in a scheduler or refs.
+Use Zustand v5 for serializable message state, selection, requested-send intent, and synchronous domain actions. Keep controllers, promises, and unique attempt identities in a separate imperative scheduler.
 
-Reducers make state transitions auditable; an imperative registry gives effectful network resources clear ownership without polluting domain objects.
+Zustand provides a small typed store with direct actions and selective React subscriptions, reducing application wiring for this take-home. Keeping network resources outside the store preserves a clear boundary: Zustand represents product truth, while the scheduler owns effectful attempts. Functional `set` updates keep transitions predictable, and narrow selectors limit unnecessary rerenders.
 
 ## D4: Stable identity for async results and focus
 
@@ -52,11 +52,11 @@ This matches the product requirement and prevents user-authored markup from bein
 
 ## D7: Minimal dependencies
 
-**Status:** Proposed
+**Status:** Accepted
 
-Prefer React, TypeScript, browser APIs, and vanilla CSS. Add a small utility only when its benefit is concrete and record the reason in `NOTES.md`.
+Use React, TypeScript, browser APIs, vanilla CSS, and Zustand. Add another utility only when its benefit is concrete and record the reason in `NOTES.md`.
 
-The problem is small, and avoiding unnecessary abstractions makes the queue rules easier to explain in a live review.
+Zustand is the one intentional application dependency: it centralizes message and selection state while allowing the scheduler to read and dispatch actions outside React. Avoiding further unnecessary abstractions keeps the queue rules easy to explain in a live review.
 
 ## D8: Time-boxed scale tradeoffs
 

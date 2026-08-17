@@ -2,7 +2,7 @@
 
 ## Design objective
 
-The queue policy should be isolated from React presentation so that sending rules can change without rewriting list components. The scheduler consumes message state and emits domain actions; components only express user intent and render state.
+The queue policy should be isolated from React presentation so that sending rules can change without rewriting list components. The scheduler reads message state and calls typed Zustand actions; components only express user intent and render selected state.
 
 ## Scheduling model
 
@@ -87,8 +87,10 @@ Beginning an attempt:
 
 ## React integration
 
-- Use a reducer for deterministic domain transitions.
-- Keep controllers and attempt identities in refs or a dedicated scheduler object, not render state.
+- Use a typed Zustand store whose actions implement deterministic domain transitions with functional `set` updates.
+- Keep controllers and attempt identities in a dedicated scheduler object, not in Zustand state.
+- Let the scheduler use the store's imperative `getState`, actions, and subscription boundary where needed; network execution must not depend on a React component remaining mounted.
+- React components should subscribe with narrow selectors. Use `useShallow` only for selectors that construct an object or array from multiple store values.
 - Make effects idempotent because React Strict Mode deliberately replays development lifecycle work.
 - Do not start requests directly during render.
 - Avoid an effect whose cleanup aborts legitimate requests merely because Strict Mode replayed it; scheduler ownership and explicit disposal should be deliberate.

@@ -1,13 +1,16 @@
 # Implementation Plan
 
-## 1. Establish domain state
+## 1. Establish the Zustand domain store
 
-- Define internal outbox state and reducer actions.
+- Add Zustand as the explicit state-management dependency.
+- Define typed `OutboxState`, `OutboxActions`, and `useOutboxStore` with the curried `create<State & Actions>()(...)` API.
+- Implement domain transitions as synchronous store actions using functional `set` updates when they depend on previous state.
 - Implement allowed message transitions.
 - Add selectors for stable ordering, selection eligibility, and recipient grouping.
+- Use narrow component selectors; reserve `useShallow` for selectors that construct multi-value objects or arrays.
 - Decide recipient normalization and deterministic tie-breaking.
 
-Acceptance check: transitions are understandable without React components, and invalid events cannot create impossible status combinations.
+Acceptance check: transitions are understandable without React components, invalid actions cannot create impossible status combinations, and the store contains no controllers or promises.
 
 ## 2. Implement the scheduler
 
