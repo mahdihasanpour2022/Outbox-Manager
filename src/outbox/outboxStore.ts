@@ -46,22 +46,35 @@ function addUnique(ids: string[], messageId: string): string[] {
   return ids.includes(messageId) ? ids : [...ids, messageId];
 }
 
-function createMessage(input: ComposeMessageInput): Message {
+function createMessage(input: ComposeMessageInput, createdAt: number): Message {
   return {
     id: crypto.randomUUID(),
     recipient: input.recipient.trim(),
     subject: input.subject.trim(),
     body: input.body,
     status: 'pending',
-    createdAt: Date.now(),
+    createdAt,
   };
 }
 
 export const useOutboxStore = create<OutboxStore>()((set, get) => {
   const actions: OutboxActions = {
     composeMessage: (input) => {
-      const message = createMessage(input);
-      set((state) => ({ messages: [...state.messages, message] }));
+      let message: Message | undefined;
+
+      set((state) => {
+        const latestCreatedAt = state.messages.reduce(
+          (latest, candidate) => Math.max(latest, candidate.createdAt),
+          0,
+        );
+        message = createMessage(
+          input,
+          Math.max(Date.now(), latestCreatedAt + 1),
+        );
+        return { messages: [...state.messages, message] };
+      });
+
+      if (!message) throw new Error('Message creation did not complete.');
       return message;
     },
 

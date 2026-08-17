@@ -1,5 +1,7 @@
 # Test Strategy
 
+Implemented verification results are recorded in `09-verification.md`.
+
 ## Priorities
 
 The highest-risk behavior is asynchronous scheduling, followed by cancellation races and dynamic-list focus. Visual details are lower risk and can rely more on focused manual verification within the assignment time box.

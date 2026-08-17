@@ -79,3 +79,5 @@ Acceptance check: content does not overflow at common mobile widths, and focus/s
 - Confirm `node_modules` is excluded from the final archive.
 
 Acceptance check: `pnpm install && pnpm dev` works from a clean copy, the production build passes, and `NOTES.md` matches implemented behavior.
+
+Verification result: completed. See `09-verification.md` and the root-level `NOTES.md`.
