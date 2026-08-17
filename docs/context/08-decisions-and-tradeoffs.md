@@ -4,7 +4,7 @@ This is a living decision log. Entries marked **Proposed** must be confirmed aga
 
 ## D1: Pause a recipient after failure
 
-**Status:** Proposed
+**Status:** Accepted
 
 When a message fails, later messages for the same recipient remain paused. Other recipients continue. The failed message can be retried explicitly.
 
@@ -12,7 +12,7 @@ This prevents a follow-up from arriving without the context of the earlier messa
 
 ## D2: Sequential lanes per recipient
 
-**Status:** Proposed
+**Status:** Accepted
 
 Use a scheduler that allows one active request per normalized recipient and concurrent active requests across distinct recipients.
 
@@ -28,7 +28,7 @@ Zustand provides a small typed store with direct actions and selective React sub
 
 ## D4: Stable identity for async results and focus
 
-**Status:** Proposed
+**Status:** Accepted
 
 Use message IDs for React keys, selection, and focus. Use an additional unique attempt ID for each send attempt.
 
@@ -65,6 +65,14 @@ Zustand is the one intentional application dependency: it centralizes message an
 For the take-home, in-memory state and a simple scan/group scheduler are sufficient. At scale, consider persistence, server-authoritative idempotency keys, bounded global concurrency, retry/backoff policy, virtualization for large lists, observability, and integration tests against deterministic network simulations.
 
 These are intentionally deferred because they do not improve the core proof of ordering, independence, cancellation, and accessibility within the assignment scope.
+
+## D9: Modern, accessible visual direction
+
+**Status:** Accepted
+
+Use a modern responsive interface with a clear information hierarchy, restrained surfaces, strong typography, compact status treatments, and polished empty/loading/error states. Implement it with vanilla CSS and native semantic controls rather than a component library.
+
+Visual styling must support the product truth: status is expressed with text and shape as well as color, focus is always visible, motion is restrained, and long user-authored content remains readable on narrow screens.
 
 ## Finalization checklist
 

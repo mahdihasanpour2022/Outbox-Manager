@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/api/messageapi.ts","./src/outbox/outboxstore.ts","./src/outbox/selectors.ts","./src/outbox/types.ts","./src/types/message.ts"],"version":"5.6.3"}
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/api/messageapi.ts","./src/outbox/outboxstore.ts","./src/outbox/scheduler.ts","./src/outbox/selectors.ts","./src/outbox/types.ts","./src/types/message.ts"],"version":"5.6.3"}
