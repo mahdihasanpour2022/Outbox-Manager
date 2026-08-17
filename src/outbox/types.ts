@@ -6,10 +6,25 @@ export interface ComposeMessageInput {
   body: string;
 }
 
+export type OutboxActivityType =
+  | 'send-started'
+  | 'send-succeeded'
+  | 'send-failed'
+  | 'send-cancelled'
+  | 'retry-requested';
+
+export interface OutboxActivity {
+  sequence: number;
+  type: OutboxActivityType;
+  messageId: string;
+}
+
 export interface OutboxState {
   messages: Message[];
   selectedIds: string[];
   requestedSendIds: string[];
+  lastActivity: OutboxActivity | null;
+  activitySequence: number;
 }
 
 export interface OutboxActions {

@@ -73,6 +73,7 @@ State outside `Message` may include:
 
 - `selectedIds: Set<string>` or an equivalent serializable representation
 - `focusedMessageId: string | null`
+- A serializable latest-activity record for accessible status announcements
 - Active attempt/controller records stored outside render state
 - Optional validation errors and live-region announcements
 

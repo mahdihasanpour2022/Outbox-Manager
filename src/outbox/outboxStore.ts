@@ -12,6 +12,8 @@ export const initialOutboxState: OutboxState = {
   messages: [],
   selectedIds: [],
   requestedSendIds: [],
+  lastActivity: null,
+  activitySequence: 0,
 };
 
 function replaceMessageStatus(
@@ -126,7 +128,18 @@ export const useOutboxStore = create<OutboxStore>()((set, get) => {
           'sending',
         );
 
-        return messages === state.messages ? state : { messages };
+        if (messages === state.messages) return state;
+
+        const activitySequence = state.activitySequence + 1;
+        return {
+          messages,
+          activitySequence,
+          lastActivity: {
+            sequence: activitySequence,
+            type: 'send-started',
+            messageId,
+          },
+        };
       });
     },
 
@@ -141,10 +154,17 @@ export const useOutboxStore = create<OutboxStore>()((set, get) => {
 
         if (messages === state.messages) return state;
 
+        const activitySequence = state.activitySequence + 1;
         return {
           messages,
           requestedSendIds: withoutId(state.requestedSendIds, messageId),
           selectedIds: withoutId(state.selectedIds, messageId),
+          activitySequence,
+          lastActivity: {
+            sequence: activitySequence,
+            type: 'send-succeeded',
+            messageId,
+          },
         };
       });
     },
@@ -160,10 +180,17 @@ export const useOutboxStore = create<OutboxStore>()((set, get) => {
 
         if (messages === state.messages) return state;
 
+        const activitySequence = state.activitySequence + 1;
         return {
           messages,
           requestedSendIds: withoutId(state.requestedSendIds, messageId),
           selectedIds: withoutId(state.selectedIds, messageId),
+          activitySequence,
+          lastActivity: {
+            sequence: activitySequence,
+            type: 'send-failed',
+            messageId,
+          },
         };
       });
     },
@@ -179,9 +206,16 @@ export const useOutboxStore = create<OutboxStore>()((set, get) => {
 
         if (messages === state.messages) return state;
 
+        const activitySequence = state.activitySequence + 1;
         return {
           messages,
           requestedSendIds: withoutId(state.requestedSendIds, messageId),
+          activitySequence,
+          lastActivity: {
+            sequence: activitySequence,
+            type: 'send-cancelled',
+            messageId,
+          },
         };
       });
     },
@@ -197,10 +231,17 @@ export const useOutboxStore = create<OutboxStore>()((set, get) => {
 
         if (messages === state.messages) return state;
 
+        const activitySequence = state.activitySequence + 1;
         return {
           messages,
           requestedSendIds: addUnique(state.requestedSendIds, messageId),
           selectedIds: withoutId(state.selectedIds, messageId),
+          activitySequence,
+          lastActivity: {
+            sequence: activitySequence,
+            type: 'retry-requested',
+            messageId,
+          },
         };
       });
     },

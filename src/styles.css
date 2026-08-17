@@ -453,6 +453,17 @@ textarea:focus-visible {
   font-size: 0.7rem;
 }
 
+.message-footer {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 13px;
+}
+
+.message-footer .message-meta { margin-top: 0; }
+
 .message-meta svg {
   width: 14px;
   margin-right: 2px;
@@ -462,6 +473,63 @@ textarea:focus-visible {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+.failure-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin: 13px 0 0;
+  padding: 9px 10px;
+  color: #8f3942;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  border: 1px solid #f0d4d7;
+  border-radius: 10px;
+  background: #fff5f5;
+}
+
+.failure-note svg {
+  width: 15px;
+  flex: 0 0 15px;
+  margin-top: 1px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.message-action {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 9px;
+  font-size: 0.72rem;
+  font-weight: 750;
+  border: 1px solid;
+  border-radius: 9px;
+  background: white;
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
+}
+
+.message-action:hover { transform: translateY(-1px); }
+
+.message-action svg {
+  width: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cancel-action { color: #9c3d47; border-color: #ebcbd0; }
+.cancel-action:hover { border-color: #dca9b0; background: #fff5f6; }
+.retry-action { color: #176d5b; border-color: #bcded4; background: #f4fbf8; }
+.retry-action:hover { border-color: #86beaf; background: #eaf7f2; }
 
 .status-badge {
   flex: 0 0 auto;
@@ -555,6 +623,8 @@ textarea:focus-visible {
   .selection-bar { padding-inline: 20px; }
   .message-list { padding: 9px; }
   .message-item { padding: 14px; }
+  .message-footer { align-items: flex-start; flex-direction: column; }
+  .message-action { width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {

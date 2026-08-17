@@ -91,7 +91,7 @@ Owns active attempts and calls `sendMessage`. It evaluates recipient lanes, disp
 
 ## State boundaries
 
-Zustand state should contain serializable product state: messages, selection, requested-send intent, and synchronous actions. Controllers, promises, and attempt tokens belong to the scheduler layer.
+Zustand state should contain serializable product state: messages, selection, requested-send intent, the latest committed activity for accessible announcements, and synchronous actions. Controllers, promises, and attempt tokens belong to the scheduler layer.
 
 Avoid mirroring derived concepts such as “has selected messages” or recipient group arrays in state. Compute them from the canonical collections.
 

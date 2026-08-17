@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useOutboxStore } from '../outbox/outboxStore';
 import { compareMessages } from '../outbox/selectors';
+import { outboxScheduler } from '../outbox/scheduler';
+import type { OutboxActivity } from '../outbox/types';
+import type { Message } from '../types/message';
 import MessageItem from './MessageItem';
 
 export default function Outbox() {
@@ -12,6 +15,8 @@ export default function Outbox() {
   const requestSelectedSend = useOutboxStore(
     (state) => state.requestSelectedSend,
   );
+  const requestRetry = useOutboxStore((state) => state.requestRetry);
+  const lastActivity = useOutboxStore((state) => state.lastActivity);
   const selectAllRef = useRef<HTMLInputElement>(null);
 
   const orderedMessages = useMemo(
@@ -42,6 +47,8 @@ export default function Outbox() {
     if (allPendingSelected) clearSelection();
     else selectAllPending();
   };
+
+  const liveAnnouncement = getActivityAnnouncement(lastActivity, messages);
 
   return (
     <section className="outbox-card" aria-labelledby="outbox-title">
@@ -105,11 +112,46 @@ export default function Outbox() {
                 message={message}
                 selected={selectedIdSet.has(message.id)}
                 onToggleSelection={toggleSelection}
+                onCancel={(messageId) => {
+                  outboxScheduler.cancel(messageId);
+                }}
+                onRetry={requestRetry}
               />
             ))}
           </ul>
         </>
       )}
+      <p
+        key={lastActivity?.sequence ?? 0}
+        className="sr-only"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {liveAnnouncement}
+      </p>
     </section>
   );
+}
+
+function getActivityAnnouncement(
+  activity: OutboxActivity | null,
+  messages: Message[],
+): string {
+  if (!activity) return '';
+
+  const message = messages.find((candidate) => candidate.id === activity.messageId);
+  if (!message) return '';
+
+  switch (activity.type) {
+    case 'send-started':
+      return `Sending "${message.subject}" to ${message.recipient}.`;
+    case 'send-succeeded':
+      return `"${message.subject}" was delivered.`;
+    case 'send-failed':
+      return `"${message.subject}" failed. Later messages to ${message.recipient} are paused.`;
+    case 'send-cancelled':
+      return `Sending cancelled. "${message.subject}" returned to pending.`;
+    case 'retry-requested':
+      return `Retrying "${message.subject}" to ${message.recipient}.`;
+  }
 }
