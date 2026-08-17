@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
+import { useStableListFocus } from '../hooks/useStableListFocus';
 import { useOutboxStore } from '../outbox/outboxStore';
 import { compareMessages } from '../outbox/selectors';
 import { outboxScheduler } from '../outbox/scheduler';
@@ -18,6 +19,7 @@ export default function Outbox() {
   const requestRetry = useOutboxStore((state) => state.requestRetry);
   const lastActivity = useOutboxStore((state) => state.lastActivity);
   const selectAllRef = useRef<HTMLInputElement>(null);
+  const outboxTitleRef = useRef<HTMLHeadingElement>(null);
 
   const orderedMessages = useMemo(
     () => [...messages].sort(compareMessages),
@@ -30,6 +32,14 @@ export default function Outbox() {
     [messages],
   );
   const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+  const orderedMessageIds = useMemo(
+    () => orderedMessages.map((message) => message.id),
+    [orderedMessages],
+  );
+  const listFocus = useStableListFocus({
+    itemIds: orderedMessageIds,
+    fallbackFocusRef: outboxTitleRef,
+  });
   const selectedPendingCount = pendingIds.filter((id) =>
     selectedIdSet.has(id),
   ).length;
@@ -56,7 +66,7 @@ export default function Outbox() {
         <div>
           <p className="eyebrow">Your outbox</p>
           <div className="outbox-title-row">
-            <h2 id="outbox-title">Messages</h2>
+            <h2 ref={outboxTitleRef} id="outbox-title" tabIndex={-1}>Messages</h2>
             <span className="count-badge">{messages.length}</span>
           </div>
         </div>
@@ -103,9 +113,16 @@ export default function Outbox() {
                 ? `${pendingIds.length} available`
                 : `${selectedPendingCount} selected`}
             </span>
+            <span className="keyboard-hint" aria-hidden="true">
+              <kbd>↑</kbd><kbd>↓</kbd> move
+            </span>
           </div>
 
-          <ul className="message-list" aria-label="Outbox messages">
+          <ul
+            ref={listFocus.listRef}
+            className="message-list"
+            aria-label="Outbox messages"
+          >
             {orderedMessages.map((message) => (
               <MessageItem
                 key={message.id}
@@ -116,6 +133,18 @@ export default function Outbox() {
                   outboxScheduler.cancel(messageId);
                 }}
                 onRetry={requestRetry}
+                rowRef={listFocus.registerRow(message.id)}
+                rowTabIndex={listFocus.activeId === message.id ? 0 : -1}
+                onRowFocus={() => listFocus.handleFocusCapture(message.id)}
+                onRowBlur={listFocus.handleBlurCapture}
+                onRowKeyDown={(event) =>
+                  listFocus.handleRowKeyDown(
+                    message.id,
+                    event,
+                    () => toggleSelection(message.id),
+                    message.status === 'pending',
+                  )
+                }
               />
             ))}
           </ul>

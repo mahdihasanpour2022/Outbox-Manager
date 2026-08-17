@@ -36,7 +36,7 @@ A message ID preserves user position, while an attempt ID prevents a cancelled o
 
 ## D5: Native semantics with optional row navigation
 
-**Status:** Proposed
+**Status:** Accepted
 
 Use native forms, buttons, checkboxes, and list semantics. Add arrow/Home/End movement as a focused enhancement without replacing native Tab navigation.
 

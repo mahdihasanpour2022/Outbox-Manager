@@ -1,3 +1,8 @@
+import type {
+  FocusEvent,
+  KeyboardEvent,
+  RefCallback,
+} from 'react';
 import type { Message } from '../types/message';
 import StatusBadge from './StatusBadge';
 
@@ -14,6 +19,11 @@ interface MessageItemProps {
   onToggleSelection: (messageId: string) => void;
   onCancel: (messageId: string) => void;
   onRetry: (messageId: string) => void;
+  rowRef: RefCallback<HTMLLIElement>;
+  rowTabIndex: number;
+  onRowFocus: () => void;
+  onRowBlur: (event: FocusEvent<HTMLLIElement>) => void;
+  onRowKeyDown: (event: KeyboardEvent<HTMLLIElement>) => void;
 }
 
 export default function MessageItem({
@@ -22,13 +32,26 @@ export default function MessageItem({
   onToggleSelection,
   onCancel,
   onRetry,
+  rowRef,
+  rowTabIndex,
+  onRowFocus,
+  onRowBlur,
+  onRowKeyDown,
 }: MessageItemProps) {
   const isSelectable = message.status === 'pending';
   const createdAt = new Date(message.createdAt);
   const selectionLabel = `Select "${message.subject}" for ${message.recipient}`;
 
   return (
-    <li className={`message-item ${selected ? 'is-selected' : ''}`}>
+    <li
+      ref={rowRef}
+      className={`message-item ${selected ? 'is-selected' : ''}`}
+      tabIndex={rowTabIndex}
+      aria-keyshortcuts="ArrowUp ArrowDown Home End Space"
+      onFocusCapture={onRowFocus}
+      onBlurCapture={onRowBlur}
+      onKeyDown={onRowKeyDown}
+    >
       <div className="message-select">
         <input
           id={`select-${message.id}`}
