@@ -1,4 +1,5 @@
 import ComposeForm from './components/ComposeForm';
+import Outbox from './components/Outbox';
 import { useOutboxStore } from './outbox/outboxStore';
 
 export default function App() {
@@ -34,26 +35,7 @@ export default function App() {
 
         <div className="workspace-grid">
           <ComposeForm />
-          <aside className="outbox-preview" aria-labelledby="outbox-preview-title">
-            <div className="preview-orbit" aria-hidden="true">
-              <div className="preview-icon">
-                <svg viewBox="0 0 24 24" focusable="false">
-                  <path d="M4 4h16v16H4z" />
-                  <path d="M4 13h4l2 3h4l2-3h4" />
-                </svg>
-              </div>
-            </div>
-            <p className="eyebrow">Your outbox</p>
-            <h2 id="outbox-preview-title">
-              {messageCount === 0
-                ? 'Ready for your first message'
-                : `${messageCount} ${messageCount === 1 ? 'message' : 'messages'} waiting`}
-            </h2>
-            <p>
-              Messages you compose will wait safely here until you choose to
-              send them.
-            </p>
-          </aside>
+          <Outbox />
         </div>
       </main>
     </div>

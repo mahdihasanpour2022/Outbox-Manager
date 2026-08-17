@@ -15,6 +15,7 @@ export interface OutboxState {
 export interface OutboxActions {
   composeMessage: (input: ComposeMessageInput) => Message;
   toggleSelection: (messageId: string) => void;
+  selectAllPending: () => void;
   clearSelection: () => void;
   requestSelectedSend: () => void;
   markSendStarted: (messageId: string) => void;

@@ -1,0 +1,115 @@
+import { useEffect, useMemo, useRef } from 'react';
+import { useOutboxStore } from '../outbox/outboxStore';
+import { compareMessages } from '../outbox/selectors';
+import MessageItem from './MessageItem';
+
+export default function Outbox() {
+  const messages = useOutboxStore((state) => state.messages);
+  const selectedIds = useOutboxStore((state) => state.selectedIds);
+  const toggleSelection = useOutboxStore((state) => state.toggleSelection);
+  const selectAllPending = useOutboxStore((state) => state.selectAllPending);
+  const clearSelection = useOutboxStore((state) => state.clearSelection);
+  const requestSelectedSend = useOutboxStore(
+    (state) => state.requestSelectedSend,
+  );
+  const selectAllRef = useRef<HTMLInputElement>(null);
+
+  const orderedMessages = useMemo(
+    () => [...messages].sort(compareMessages),
+    [messages],
+  );
+  const pendingIds = useMemo(
+    () => messages
+      .filter((message) => message.status === 'pending')
+      .map((message) => message.id),
+    [messages],
+  );
+  const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+  const selectedPendingCount = pendingIds.filter((id) =>
+    selectedIdSet.has(id),
+  ).length;
+  const allPendingSelected =
+    pendingIds.length > 0 && selectedPendingCount === pendingIds.length;
+  const partiallySelected = selectedPendingCount > 0 && !allPendingSelected;
+
+  useEffect(() => {
+    if (selectAllRef.current) {
+      selectAllRef.current.indeterminate = partiallySelected;
+    }
+  }, [partiallySelected]);
+
+  const handleSelectAll = () => {
+    if (allPendingSelected) clearSelection();
+    else selectAllPending();
+  };
+
+  return (
+    <section className="outbox-card" aria-labelledby="outbox-title">
+      <header className="outbox-heading">
+        <div>
+          <p className="eyebrow">Your outbox</p>
+          <div className="outbox-title-row">
+            <h2 id="outbox-title">Messages</h2>
+            <span className="count-badge">{messages.length}</span>
+          </div>
+        </div>
+        <button
+          className="button button-primary send-button"
+          type="button"
+          disabled={selectedPendingCount === 0}
+          onClick={requestSelectedSend}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="m22 2-7 20-4-9-9-4Z" />
+            <path d="M22 2 11 13" />
+          </svg>
+          Send selected{selectedPendingCount > 0 ? ` (${selectedPendingCount})` : ''}
+        </button>
+      </header>
+
+      {messages.length === 0 ? (
+        <div className="empty-outbox">
+          <div className="empty-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path d="M4 4h16v16H4z" />
+              <path d="M4 13h4l2 3h4l2-3h4" />
+            </svg>
+          </div>
+          <h3>Ready for your first message</h3>
+          <p>Messages you compose will wait safely here until you send them.</p>
+        </div>
+      ) : (
+        <>
+          <div className="selection-bar">
+            <label className="select-all">
+              <input
+                ref={selectAllRef}
+                type="checkbox"
+                checked={allPendingSelected}
+                disabled={pendingIds.length === 0}
+                onChange={handleSelectAll}
+              />
+              <span>Select all pending</span>
+            </label>
+            <span className="selection-summary" aria-live="polite">
+              {selectedPendingCount === 0
+                ? `${pendingIds.length} available`
+                : `${selectedPendingCount} selected`}
+            </span>
+          </div>
+
+          <ul className="message-list" aria-label="Outbox messages">
+            {orderedMessages.map((message) => (
+              <MessageItem
+                key={message.id}
+                message={message}
+                selected={selectedIdSet.has(message.id)}
+                onToggleSelection={toggleSelection}
+              />
+            ))}
+          </ul>
+        </>
+      )}
+    </section>
+  );
+}

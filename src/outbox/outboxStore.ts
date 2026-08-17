@@ -75,6 +75,23 @@ export const useOutboxStore = create<OutboxStore>()((set, get) => {
       });
     },
 
+    selectAllPending: () => {
+      set((state) => {
+        const selectedIds = state.messages
+          .filter((message) => message.status === 'pending')
+          .map((message) => message.id);
+
+        if (
+          selectedIds.length === state.selectedIds.length &&
+          selectedIds.every((id) => state.selectedIds.includes(id))
+        ) {
+          return state;
+        }
+
+        return { selectedIds };
+      });
+    },
+
     clearSelection: () => {
       if (get().selectedIds.length > 0) set({ selectedIds: [] });
     },
