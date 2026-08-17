@@ -30,7 +30,7 @@ src/
     message.ts                 # Provided domain type
   App.tsx
   main.tsx
-  styles.css
+  styles.css                    # Tailwind v4 import entrypoint only
 ```
 
 The exact number of files should stay proportional to the assignment. Small modules may be combined when their boundary remains clear.

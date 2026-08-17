@@ -31,6 +31,7 @@ This yields two fundamental scheduling rules:
 
 - React 19, TypeScript, Vite, and pnpm are required.
 - Zustand v5 is the chosen state-management dependency.
+- Tailwind CSS v4 with its official Vite plugin is the chosen styling system.
 - `src/api/messageApi.ts` must not be modified.
 - Component, form, and data-grid libraries are prohibited.
 - Message bodies are untrusted plain text and must never be rendered as HTML.

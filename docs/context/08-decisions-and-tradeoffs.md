@@ -54,9 +54,9 @@ This matches the product requirement and prevents user-authored markup from bein
 
 **Status:** Accepted
 
-Use React, TypeScript, browser APIs, vanilla CSS, and Zustand. Add another utility only when its benefit is concrete and record the reason in `NOTES.md`.
+Use React, TypeScript, browser APIs, Tailwind CSS, and Zustand. Add another utility only when its benefit is concrete and record the reason in `NOTES.md`.
 
-Zustand is the one intentional application dependency: it centralizes message and selection state while allowing the scheduler to read and dispatch actions outside React. Avoiding further unnecessary abstractions keeps the queue rules easy to explain in a live review.
+Zustand centralizes message and selection state while allowing the scheduler to read and dispatch actions outside React. Tailwind provides the responsive visual system without introducing a component library. Avoiding further abstractions keeps the queue rules easy to explain in a live review.
 
 ## D8: Time-boxed scale tradeoffs
 
@@ -70,7 +70,7 @@ These are intentionally deferred because they do not improve the core proof of o
 
 **Status:** Accepted
 
-Use a modern responsive interface with a clear information hierarchy, restrained surfaces, strong typography, compact status treatments, and polished empty/loading/error states. Implement it with vanilla CSS and native semantic controls rather than a component library.
+Use a modern responsive interface with a clear information hierarchy, restrained surfaces, strong typography, compact status treatments, and polished empty/loading/error states. Implement it with Tailwind CSS utilities and native semantic controls rather than a component library.
 
 Visual styling must support the product truth: status is expressed with text and shape as well as color, focus is always visible, motion is restrained, and long user-authored content remains readable on narrow screens.
 

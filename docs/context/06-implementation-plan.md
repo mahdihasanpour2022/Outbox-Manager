@@ -62,7 +62,7 @@ Acceptance check: the complete workflow works without a mouse and focus remains 
 
 ## 7. Style responsively
 
-- Use a small vanilla CSS layer unless implementation needs justify another choice.
+- Use Tailwind CSS utilities with a mobile-first responsive layout and the official Tailwind Vite plugin.
 - Ensure statuses have text and non-color cues.
 - Support narrow screens and long user-authored content.
 - Respect `prefers-reduced-motion` if transitions are present.
