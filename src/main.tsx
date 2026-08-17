@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import { outboxScheduler } from './outbox/scheduler';
+import './styles.css';
 
 outboxScheduler.start();
 
