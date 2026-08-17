@@ -14,8 +14,13 @@ export function selectOrderedMessages(state: OutboxState): Message[] {
 }
 
 export function selectSelectableIds(state: OutboxState): string[] {
+  const requestedIds = new Set(state.requestedSendIds);
+
   return state.messages
-    .filter((message) => message.status === 'pending')
+    .filter(
+      (message) =>
+        message.status === 'pending' && !requestedIds.has(message.id),
+    )
     .sort(compareMessages)
     .map((message) => message.id);
 }
@@ -66,6 +71,9 @@ export function selectIsMessageSelectable(
   messageId: string,
 ): boolean {
   return state.messages.some(
-    (message) => message.id === messageId && message.status === 'pending',
+    (message) =>
+      message.id === messageId &&
+      message.status === 'pending' &&
+      !state.requestedSendIds.includes(messageId),
   );
 }

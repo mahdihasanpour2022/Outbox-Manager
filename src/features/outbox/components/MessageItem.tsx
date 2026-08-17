@@ -16,6 +16,8 @@ const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
 interface MessageItemProps {
   message: Message;
   selected: boolean;
+  selectable: boolean;
+  queueState: 'queued' | 'waiting' | null;
   onToggleSelection: (messageId: string) => void;
   onCancel: (messageId: string) => void;
   onRetry: (messageId: string) => void;
@@ -29,6 +31,8 @@ interface MessageItemProps {
 export default function MessageItem({
   message,
   selected,
+  selectable,
+  queueState,
   onToggleSelection,
   onCancel,
   onRetry,
@@ -38,7 +42,6 @@ export default function MessageItem({
   onRowBlur,
   onRowKeyDown,
 }: MessageItemProps) {
-  const isSelectable = message.status === 'pending';
   const createdAt = new Date(message.createdAt);
   const selectionLabel = `Select "${message.subject}" for ${message.recipient}`;
 
@@ -58,7 +61,7 @@ export default function MessageItem({
           id={`select-${message.id}`}
           type="checkbox"
           checked={selected}
-          disabled={!isSelectable}
+          disabled={!selectable}
           className="size-[17px] cursor-pointer rounded accent-emerald-700 disabled:cursor-not-allowed"
           aria-label={selectionLabel}
           onChange={() => onToggleSelection(message.id)}
@@ -78,6 +81,18 @@ export default function MessageItem({
 
         <h3 className="mt-3 mb-1.5 wrap-anywhere text-[0.95rem] leading-5 font-bold tracking-tight text-slate-800">{message.subject}</h3>
         <p className="m-0 wrap-anywhere whitespace-pre-wrap text-[0.82rem] leading-5 text-slate-500">{message.body}</p>
+
+        {queueState && (
+          <p className="mt-3 flex items-center gap-2 rounded-xl border border-sky-200 bg-sky-50 p-2.5 text-xs leading-5 text-sky-800">
+            <svg className="size-4 shrink-0 fill-none stroke-current stroke-[1.8] [stroke-linecap:round] [stroke-linejoin:round]" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 7v5l3 2" />
+            </svg>
+            {queueState === 'waiting'
+              ? `Waiting for an earlier message to ${message.recipient}.`
+              : 'Queued to send…'}
+          </p>
+        )}
 
         {message.status === 'failed' && (
           <p className="mt-3 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-2.5 text-xs leading-5 text-rose-800">

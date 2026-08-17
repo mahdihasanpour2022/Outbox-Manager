@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useStableListFocus } from '../hooks/useStableListFocus';
 import { useOutboxStore } from '../model/outboxStore';
-import { compareMessages } from '../model/selectors';
+import { compareMessages, normalizeRecipient } from '../model/selectors';
 import { outboxScheduler } from '../model/scheduler';
 import type { OutboxActivity } from '../model/types';
 import type { Message } from '../../../types/message';
@@ -10,6 +10,7 @@ import MessageItem from './MessageItem';
 export default function Outbox() {
   const messages = useOutboxStore((state) => state.messages);
   const selectedIds = useOutboxStore((state) => state.selectedIds);
+  const requestedSendIds = useOutboxStore((state) => state.requestedSendIds);
   const toggleSelection = useOutboxStore((state) => state.toggleSelection);
   const selectAllPending = useOutboxStore((state) => state.selectAllPending);
   const clearSelection = useOutboxStore((state) => state.clearSelection);
@@ -27,11 +28,19 @@ export default function Outbox() {
   );
   const pendingIds = useMemo(
     () => messages
-      .filter((message) => message.status === 'pending')
+      .filter(
+        (message) =>
+          message.status === 'pending' &&
+          !requestedSendIds.includes(message.id),
+      )
       .map((message) => message.id),
-    [messages],
+    [messages, requestedSendIds],
   );
   const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+  const requestedIdSet = useMemo(
+    () => new Set(requestedSendIds),
+    [requestedSendIds],
+  );
   const orderedMessageIds = useMemo(
     () => orderedMessages.map((message) => message.id),
     [orderedMessages],
@@ -132,11 +141,33 @@ export default function Outbox() {
             className="grid max-h-[640px] list-none gap-2.5 overflow-y-auto p-2.5 [scrollbar-color:#bdccc7_transparent] [scrollbar-width:thin] sm:p-3"
             aria-label="Outbox messages"
           >
-            {orderedMessages.map((message) => (
-              <MessageItem
+            {orderedMessages.map((message, messageIndex) => {
+              const isRequestedPending =
+                message.status === 'pending' && requestedIdSet.has(message.id);
+              const hasEarlierRecipientBlocker = orderedMessages
+                .slice(0, messageIndex)
+                .some(
+                  (candidate) =>
+                    normalizeRecipient(candidate.recipient) ===
+                      normalizeRecipient(message.recipient) &&
+                    candidate.status !== 'delivered',
+                );
+              const selectable =
+                message.status === 'pending' && !isRequestedPending;
+
+              return (
+                <MessageItem
                 key={message.id}
                 message={message}
                 selected={selectedIdSet.has(message.id)}
+                selectable={selectable}
+                queueState={
+                  isRequestedPending
+                    ? hasEarlierRecipientBlocker
+                      ? 'waiting'
+                      : 'queued'
+                    : null
+                }
                 onToggleSelection={toggleSelection}
                 onCancel={(messageId) => {
                   outboxScheduler.cancel(messageId);
@@ -151,11 +182,12 @@ export default function Outbox() {
                     message.id,
                     event,
                     () => toggleSelection(message.id),
-                    message.status === 'pending',
+                    selectable,
                   )
                 }
               />
-            ))}
+              );
+            })}
           </ul>
         </>
       )}

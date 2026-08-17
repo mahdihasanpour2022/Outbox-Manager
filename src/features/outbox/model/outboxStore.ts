@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { Message, MessageStatus } from '../../../types/message';
-import { selectIsMessageSelectable } from './selectors';
+import { selectIsMessageSelectable, selectSelectableIds } from './selectors';
 import type {
   ComposeMessageInput,
   OutboxActions,
@@ -92,9 +92,7 @@ export const useOutboxStore = create<OutboxStore>()((set, get) => {
 
     selectAllPending: () => {
       set((state) => {
-        const selectedIds = state.messages
-          .filter((message) => message.status === 'pending')
-          .map((message) => message.id);
+        const selectedIds = selectSelectableIds(state);
 
         if (
           selectedIds.length === state.selectedIds.length &&

@@ -79,4 +79,21 @@ describe('outbox domain store', () => {
     expect(state.messages[0].status).toBe('pending');
     expect(state.requestedSendIds).toEqual([message.id]);
   });
+
+  it('does not allow queued pending messages to be selected again', () => {
+    const first = useOutboxStore.getState().composeMessage(draft);
+    const second = useOutboxStore.getState().composeMessage({
+      ...draft,
+      subject: 'Another update',
+    });
+
+    useOutboxStore.getState().toggleSelection(first.id);
+    useOutboxStore.getState().requestSelectedSend();
+    useOutboxStore.getState().toggleSelection(first.id);
+    useOutboxStore.getState().selectAllPending();
+
+    const state = useOutboxStore.getState();
+    expect(state.requestedSendIds).toEqual([first.id]);
+    expect(state.selectedIds).toEqual([second.id]);
+  });
 });
