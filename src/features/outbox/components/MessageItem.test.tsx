@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
-import type { Message } from '../types/message';
+import type { Message } from '../../../types/message';
 import MessageItem from './MessageItem';
 
 const baseMessage: Message = {

@@ -3,7 +3,7 @@ import type {
   KeyboardEvent,
   RefCallback,
 } from 'react';
-import type { Message } from '../types/message';
+import type { Message } from '../../../types/message';
 import StatusBadge from './StatusBadge';
 
 const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
@@ -45,6 +45,7 @@ export default function MessageItem({
   return (
     <li
       ref={rowRef}
+      data-message-id={message.id}
       className={`grid grid-cols-[22px_minmax(0,1fr)] gap-3 rounded-2xl border p-3.5 transition focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-blue-500/40 motion-reduce:transition-none sm:p-4 ${selected ? 'border-emerald-400 bg-emerald-50/60 shadow-[inset_3px_0_0_#047857,0_8px_24px_rgba(20,91,73,0.07)]' : 'border-slate-200 bg-white hover:border-slate-300'}`}
       tabIndex={rowTabIndex}
       aria-keyshortcuts="ArrowUp ArrowDown Home End Space"

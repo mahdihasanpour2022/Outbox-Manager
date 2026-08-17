@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Message, MessageStatus } from '../types/message';
+import type { Message, MessageStatus } from '../../../types/message';
 import { selectIsMessageSelectable } from './selectors';
 import type {
   ComposeMessageInput,

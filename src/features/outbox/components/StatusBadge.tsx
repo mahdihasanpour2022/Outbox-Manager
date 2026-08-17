@@ -1,4 +1,4 @@
-import type { MessageStatus } from '../types/message';
+import type { MessageStatus } from '../../../types/message';
 
 const STATUS_LABELS: Record<MessageStatus, string> = {
   pending: 'Pending',

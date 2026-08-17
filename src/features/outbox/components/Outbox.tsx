@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useStableListFocus } from '../hooks/useStableListFocus';
-import { useOutboxStore } from '../outbox/outboxStore';
-import { compareMessages } from '../outbox/selectors';
-import { outboxScheduler } from '../outbox/scheduler';
-import type { OutboxActivity } from '../outbox/types';
-import type { Message } from '../types/message';
+import { useOutboxStore } from '../model/outboxStore';
+import { compareMessages } from '../model/selectors';
+import { outboxScheduler } from '../model/scheduler';
+import type { OutboxActivity } from '../model/types';
+import type { Message } from '../../../types/message';
 import MessageItem from './MessageItem';
 
 export default function Outbox() {
@@ -36,7 +36,14 @@ export default function Outbox() {
     () => orderedMessages.map((message) => message.id),
     [orderedMessages],
   );
-  const listFocus = useStableListFocus({
+  const {
+    activeId,
+    listRef,
+    registerRow,
+    handleFocusCapture,
+    handleBlurCapture,
+    handleRowKeyDown,
+  } = useStableListFocus({
     itemIds: orderedMessageIds,
     fallbackFocusRef: outboxTitleRef,
   });
@@ -121,7 +128,7 @@ export default function Outbox() {
           </div>
 
           <ul
-            ref={listFocus.listRef}
+            ref={listRef}
             className="grid max-h-[640px] list-none gap-2.5 overflow-y-auto p-2.5 [scrollbar-color:#bdccc7_transparent] [scrollbar-width:thin] sm:p-3"
             aria-label="Outbox messages"
           >
@@ -135,12 +142,12 @@ export default function Outbox() {
                   outboxScheduler.cancel(messageId);
                 }}
                 onRetry={requestRetry}
-                rowRef={listFocus.registerRow(message.id)}
-                rowTabIndex={listFocus.activeId === message.id ? 0 : -1}
-                onRowFocus={() => listFocus.handleFocusCapture(message.id)}
-                onRowBlur={listFocus.handleBlurCapture}
+                rowRef={registerRow}
+                rowTabIndex={activeId === message.id ? 0 : -1}
+                onRowFocus={() => handleFocusCapture(message.id)}
+                onRowBlur={handleBlurCapture}
                 onRowKeyDown={(event) =>
-                  listFocus.handleRowKeyDown(
+                  handleRowKeyDown(
                     message.id,
                     event,
                     () => toggleSelection(message.id),

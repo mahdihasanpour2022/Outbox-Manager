@@ -1,98 +1,101 @@
-# Take-Home: Outbox Manager
+# Outbox Manager
 
-## What this is
+A resilient, keyboard-accessible message outbox built with React 19, TypeScript, Zustand, Tailwind CSS, and Vite.
 
-A small, focused exercise. We care far more about the **decisions you make
-and why** than about how much code you write. Plan for **~2–3 hours**; if
-you hit 3, stop. A working core with honest gaps beats a polished UI with
-broken logic.
+The application is designed around one invariant: messages to the same recipient are delivered in creation order, while different recipients are processed concurrently. The UI remains immediate and honest while the provided network API is slow, unreliable, cancellable, and resolves out of order.
 
-> Use whatever tools you like, including AI assistants. But everything you
-> submit, you own: be ready to justify every decision live.
+## Run locally
 
-## The product
+```bash
+pnpm install
+pnpm dev
+```
 
-You are building the outbox for our internal messaging tool. People compose
-messages to teammates; messages queue up and go out over a network that is
-slow, unreliable, and answers in whatever order it likes. The people using
-this are mid-task and impatient: they need to **always see what is really
-happening**, and **always be able to change their mind**.
+Useful verification commands:
 
-A message has a recipient, a subject, and a body, and is in one of four
-states: `pending`, `sending`, `delivered`, `failed` (see
-`src/types/message.ts`). Bodies are plain text written by people — render
-them as exactly that.
+```bash
+pnpm test       # deterministic unit and render tests
+pnpm build      # strict TypeScript check plus production bundle
+pnpm check      # complete interview-submission verification
+```
 
-**The one guarantee this product makes:** messages to the same person arrive
-in the order they were written. And one recipient's problems must never
-delay anyone else's messages.
+## Product behavior
 
-One more thing worth knowing: sending rules change often in this product.
-Assume yours will change too, and structure the code accordingly.
+- Compose plain-text messages with accessible validation.
+- Select one or more pending messages and send them immediately.
+- Process one message at a time per normalized recipient.
+- Process unrelated recipients concurrently.
+- Cancel an active send and return it honestly to `pending`.
+- Pause a recipient lane after failure until the failed message is retried.
+- Announce important state changes without moving keyboard focus.
+- Navigate message rows with Arrow Up/Down, Home, and End; press Space on a row to toggle pending selection.
 
-## Tasks
+## Architecture
 
-### Task 1 — The outbox
+The application uses a feature-based boundary. The outbox feature exposes a deliberately small public API through `src/features/outbox/index.ts`; consumers do not reach into its internal components or model directly.
 
-Compose messages and manage the queue: a list showing each message's
-subject, recipient, when it was written, and its current state; select any
-number of them; a "Send Selected" that sends them out under the guarantee
-above. The UI reacts the instant the user acts — it never waits for the
-network before showing that something happened.
+```text
+src/
+  api/
+    messageApi.ts               # Provided unreliable API; unchanged
+  types/
+    message.ts                  # Provided domain contract
+  features/
+    outbox/
+      components/               # Compose, list, item, and status UI
+      hooks/                    # Stable keyboard focus behavior
+      model/                    # Zustand store, selectors, scheduler, tests
+      index.ts                  # Public feature API
+  App.tsx                       # Page composition
+  main.tsx                      # App and scheduler startup
+  styles.css                    # Tailwind v4 entrypoint
+```
 
-### Task 2 — Delivery, honestly
+The data flow is intentionally one-way:
 
-Sending goes through `src/api/messageApi.ts`. It is slow, it fails about a
-third of the time, and it finishes in any order. Your job is to keep the
-user informed and in control anyway:
+```text
+UI intent -> Zustand actions -> serializable product state
+                                  |
+                                  v
+                         recipient scheduler -> message API
+                                  |
+                                  v
+                         guarded status actions -> UI
+```
 
-- A message that is sending can be **cancelled** — it returns to the queue,
-  and the UI never claims something the network didn't do.
-- Some sends will fail. The user should clearly see which ones.
-- **Left to you (decide and defend):** when a message fails, what happens
-  to the messages queued behind it for the same recipient? There is no
-  single right answer.
+Zustand stores product truth: messages, selection, requested sends, and accessible activity events. The scheduler separately owns promises, `AbortController` instances, and unique attempt tokens. This prevents effectful resources from leaking into UI state and makes sending-policy changes local to the model layer.
 
-### Task 3 — No mouse
+## Delivery policy
 
-The outbox must be fully usable without ever touching a mouse, following
-the keyboard conventions a list like this is expected to have. And keyboard
-users must never lose their place: the list will change under them —
-statuses flip, messages appear and leave — and their position must survive
-it.
+If a message fails, later messages for that recipient remain paused. Automatically continuing could deliver a follow-up without the context of the failed message. Other recipient lanes continue independently, so the conservative policy does not create global head-of-line blocking.
 
-## The mock API
+See [NOTES.md](./NOTES.md) for the decision rationale and production-scale tradeoffs. Detailed implementation context and verification evidence live in [docs/context](./docs/context).
 
-Sending happens through the function provided in `src/api/messageApi.ts`.
-Do not modify it — but do read it before you build. In short:
+## Verification
 
-- It takes 1–3 seconds, at random.
-- It fails about a third of the time, at random.
-- Calls finish in any order.
-- It can be stopped partway: pass an `AbortSignal`, and an aborted call
-  throws an `AbortError`.
+The deterministic test suite covers:
 
-## Stack
+- Same-recipient ordering and non-overlap
+- Cross-recipient concurrency
+- Failure blocking and retry progression
+- Cancellation and stale completion rejection
+- Guarded store transitions
+- Same-millisecond creation ordering
+- Plain-text escaping and failure controls
 
-**Required:** React 19 · TypeScript · Vite · pnpm
-**Styling:** your choice (Tailwind, CSS Modules, SCSS, vanilla, CSS-in-JS)
-**Do NOT use:** component libraries (MUI, Chakra, Radix, shadcn/ui, …),
-form libraries, data-grid libraries. Small utilities (clsx, nanoid) are
-fine — mention why in your NOTES.
+The production build and dev-server smoke test are documented in [docs/context/09-verification.md](./docs/context/09-verification.md).
 
-## Deliverables
+## Assignment constraints
 
-1. **The project, running cleanly:** `pnpm install && pnpm dev` works from
-   a fresh copy of the folder.
-2. **A short `NOTES.md`** (a few paragraphs) covering:
-   1. the decision Task 2 left to you: when a message fails, what does
-      your app do with the messages still waiting to reach that same
-      recipient — and why is that better than the other way?
-   2. anything you'd change at scale, or traded off for time.
+This solution uses the required React 19, TypeScript, Vite, and pnpm stack. It does not use a component library, form library, or data-grid library. The provided files `src/api/messageApi.ts` and `src/types/message.ts` remain unchanged.
 
-## Submission
+The original exercise requires:
 
-When done, send us a `.zip` of the project. Make sure it
- **excludes `node_modules`**.
+1. A message with recipient, subject, body, creation time, and one of four states: `pending`, `sending`, `delivered`, or `failed`.
+2. Immediate UI feedback while an API takes one to three seconds, fails approximately 30% of the time, and completes calls in arbitrary order.
+3. In-order delivery per recipient without allowing one recipient to delay another.
+4. Cancellation through `AbortSignal` without claiming a network result that did not happen.
+5. Full keyboard usability with stable focus while the list changes.
+6. A short `NOTES.md` explaining the failure policy and scale/time tradeoffs.
 
-Good luck!
+When creating the submission ZIP, exclude `node_modules` and other ignored build artifacts.

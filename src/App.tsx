@@ -1,6 +1,4 @@
-import ComposeForm from './components/ComposeForm';
-import Outbox from './components/Outbox';
-import { useOutboxStore } from './outbox/outboxStore';
+import { ComposeForm, Outbox, useOutboxStore } from './features/outbox';
 
 export default function App() {
   const messageCount = useOutboxStore((state) => state.messages.length);

@@ -1,5 +1,5 @@
 import { useId, useRef, useState, type FormEvent } from 'react';
-import { useOutboxStore } from '../outbox/outboxStore';
+import { useOutboxStore } from '../model/outboxStore';
 
 interface DraftMessage {
   recipient: string;

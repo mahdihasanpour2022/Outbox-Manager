@@ -1,5 +1,5 @@
-import { sendMessage } from '../api/messageApi';
-import type { Message } from '../types/message';
+import { sendMessage } from '../../../api/messageApi';
+import type { Message } from '../../../types/message';
 import { useOutboxStore } from './outboxStore';
 import {
   normalizeRecipient,

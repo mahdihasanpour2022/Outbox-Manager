@@ -1,4 +1,4 @@
-import type { Message } from '../types/message';
+import type { Message } from '../../../types/message';
 
 export interface ComposeMessageInput {
   recipient: string;

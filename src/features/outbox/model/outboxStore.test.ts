@@ -8,7 +8,7 @@ const draft = {
   body: '<strong>plain text</strong>\nSecond line',
 };
 
-describe('outbox store', () => {
+describe('outbox domain store', () => {
   beforeEach(() => {
     useOutboxStore.setState({ ...initialOutboxState });
   });

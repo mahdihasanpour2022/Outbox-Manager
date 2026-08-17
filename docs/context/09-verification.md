@@ -6,6 +6,7 @@ Verified on August 17, 2026:
 
 - `pnpm install --frozen-lockfile`: passed; lockfile and installed dependency graph agree.
 - `pnpm test`: passed; 10 deterministic tests across three files.
+- `pnpm lint`: passed with ESLint's recommended TypeScript and React Hooks rules.
 - `pnpm build`: passed; TypeScript project build and Vite production bundle completed.
 - `pnpm dev --host 127.0.0.1 --port 4179 --strictPort`: started successfully and returned HTTP 200; the smoke-test process was then stopped.
 
@@ -32,3 +33,5 @@ Before final submission, perform a short human pass in the target browsers with 
 ## Packaging audit
 
 `.gitignore` excludes `node_modules`, `.pnpm-store`, `dist`, logs, and common editor/OS artifacts. The final ZIP should be created from tracked/source files and must not include ignored dependency or build directories.
+
+GitHub Actions runs the same `pnpm check` lint/test/build gate on pushes and pull requests.

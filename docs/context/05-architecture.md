@@ -14,18 +14,21 @@
 src/
   api/
     messageApi.ts              # Provided; do not modify
-  components/
-    ComposeForm.tsx
-    Outbox.tsx
-    MessageItem.tsx
-    StatusBadge.tsx
-  hooks/
-    useStableListFocus.ts      # Keyboard/focus behavior
-  outbox/
-    outboxStore.ts             # Typed Zustand state and actions
-    selectors.ts               # Ordering and eligibility
-    scheduler.ts               # Per-recipient execution policy
-    types.ts                   # Internal action/attempt types
+  features/
+    outbox/
+      components/
+        ComposeForm.tsx
+        Outbox.tsx
+        MessageItem.tsx
+        StatusBadge.tsx
+      hooks/
+        useStableListFocus.ts  # Keyboard/focus behavior
+      model/
+        outboxStore.ts         # Typed Zustand state and actions
+        selectors.ts           # Ordering and eligibility
+        scheduler.ts           # Per-recipient execution policy
+        types.ts               # Internal action/attempt types
+      index.ts                 # Public feature API
   types/
     message.ts                 # Provided domain type
   App.tsx
@@ -34,6 +37,8 @@ src/
 ```
 
 The exact number of files should stay proportional to the assignment. Small modules may be combined when their boundary remains clear.
+
+The outbox feature exposes its supported surface through `features/outbox/index.ts`. Page-level code imports from that public entrypoint instead of reaching into feature internals.
 
 ## Responsibilities
 

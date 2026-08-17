@@ -3,12 +3,12 @@ import {
   useLayoutEffect,
   useRef,
   useState,
-  type FocusEvent,
   type KeyboardEvent,
   type RefCallback,
   type RefObject,
 } from 'react';
 
+/** Keeps keyboard position stable while outbox rows change around the user. */
 interface StableListFocusOptions {
   itemIds: string[];
   fallbackFocusRef?: RefObject<HTMLElement | null>;
@@ -32,14 +32,19 @@ export function useStableListFocus({
     row.focus();
   }, []);
 
-  const registerRow = useCallback(
-    (messageId: string): RefCallback<HTMLLIElement> =>
-      (row) => {
-        if (row) rowRefs.current.set(messageId, row);
-        else rowRefs.current.delete(messageId);
-      },
-    [],
-  );
+  const registerRow = useCallback<RefCallback<HTMLLIElement>>((row) => {
+    if (!row) return;
+
+    const messageId = row.dataset.messageId;
+    if (!messageId) return;
+
+    rowRefs.current.set(messageId, row);
+    return () => {
+      if (rowRefs.current.get(messageId) === row) {
+        rowRefs.current.delete(messageId);
+      }
+    };
+  }, []);
 
   const handleFocusCapture = useCallback(
     (messageId: string) => {
@@ -49,7 +54,7 @@ export function useStableListFocus({
     [],
   );
 
-  const handleBlurCapture = useCallback((_event: FocusEvent<HTMLElement>) => {
+  const handleBlurCapture = useCallback(() => {
     queueMicrotask(() => {
       const list = listRef.current;
       focusWasWithinListRef.current = Boolean(

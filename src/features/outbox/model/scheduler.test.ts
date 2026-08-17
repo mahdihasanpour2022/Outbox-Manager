@@ -34,7 +34,7 @@ function requestMessages(messageIds: string[]) {
   useOutboxStore.getState().requestSelectedSend();
 }
 
-describe('outbox scheduler', () => {
+describe('outbox delivery scheduler', () => {
   let scheduler: OutboxScheduler | null = null;
 
   beforeEach(() => {
